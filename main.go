@@ -7,15 +7,15 @@ import (
 )
 
 func searchDirs(path string) (bool, error) {
-	dir, err := os.Open(path)
+	dir, err := os.Open(path + "test")
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
 	defer dir.Close()
 
 	files, err := dir.Readdirnames(0)
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
 
 	for _, f := range files {
