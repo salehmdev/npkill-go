@@ -7,61 +7,64 @@ import (
 	"strconv"
 )
 
-func findNodeModsCountRecurive(path string) (int, error) {
+func getNodeModsPathsRecurive(path string) ([]string, error) {
 	dir, err := os.Open(path)
 	if err != nil {
-		return 0, err
+		return []string{}, err
 	}
 	defer dir.Close()
 
 	files, err := dir.Readdirnames(0)
 	if err != nil {
-		return 0, err
+		return []string{}, err
 	}
 
-	nodeModulesCount := 0
+	var nodeModulesPathArr []string
 
 	for _, file := range files {
 		if file == "node_modules" {
-			nodeModulesCount += 1
+			nodeModulesPathArr = append(nodeModulesPathArr, path+"/"+file)
 			continue
 		}
 
 		filePath := path + string(os.PathSeparator) + file
 		fileInfo, err := os.Stat(filePath)
 		if err != nil {
-			return 0, err
+			return []string{}, err
 		}
 
 		if fileInfo.IsDir() {
-			newCount, err := findNodeModsCountRecurive(filePath)
+			newNodeModulesPathArr, err := getNodeModsPathsRecurive(filePath)
 			if err != nil {
-				return 0, err
+				return []string{}, err
 			}
-			nodeModulesCount += newCount
+			nodeModulesPathArr = append(nodeModulesPathArr, newNodeModulesPathArr...)
 		}
 	}
 
-	return nodeModulesCount, nil
+	return nodeModulesPathArr, nil
 }
 
 func main() {
-	// scan all directories
 	path, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	foundCount, err := findNodeModsCountRecurive(path)
+	foundArr, err := getNodeModsPathsRecurive(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if foundCount > 0 {
-		fmt.Println("Found " + strconv.Itoa(foundCount) + " \"node_modules\" directories.")
-		os.RemoveAll("node_modules")
+	if len(foundArr) > 0 {
+		fmt.Println("Found " + strconv.Itoa(len(foundArr)) + " \"node_modules\" directories.")
+		fmt.Println("Deleting...")
+		for _, f := range foundArr {
+			fmt.Println(f)
+			os.RemoveAll(f)
+		}
+		fmt.Println("Done!")
 	} else {
 		fmt.Println("No \"node_modules\" found...")
 	}
-	// for 'node_modules', remove all content/folders within that folder.
 }
