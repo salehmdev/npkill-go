@@ -63,8 +63,8 @@ func main() {
 			fmt.Println(f)
 			os.RemoveAll(f)
 		}
-		fmt.Println("Done!")
+		fmt.Println("Done! :)")
 	} else {
-		fmt.Println("No \"node_modules\" found...")
+		fmt.Println("No \"node_modules\" found... :)")
 	}
 }
